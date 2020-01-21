@@ -11,31 +11,56 @@ namespace cif
 		/// <summary>
 		/// cif is a tool to encrypt or decrypt any text by using a secret key.
 		/// </summary>
-		/// <param name="action">The secret required to encrypt or decrypt.</param>
-		/// <param name="args">-secret is the key to encrypt while -text is the text to encrypt.</param>
-		public static async Task Main(string action, string[] args = null)
+		/// <param name="args"></param>
+		public static async Task Main(string[] args)
 		{
+			var command = new RootCommand();
 
-			Console.WriteLine("Welcome to Cif the encryptor and decryptor!");
-
-			var encryptCommand = new RootCommand(action)
+			if (args[0] == "encrypt")
 			{
-				new Option("-secret") {Argument = new Argument<string>()},
-				new Option("-text") {Argument = new Argument<string>()}
-			};
+				var encryptCommand = new Command("encrypt")
+				{
+					new Option("-secret", "The secret required to encryption.") {Argument = new Argument<string>()},
+					new Option("-text", "The text to encrypt.") {Argument = new Argument<string>()}
+				};
+
+				encryptCommand.Handler = CommandHandler.Create<string, string>(Encrypt);
+
+				await encryptCommand.InvokeAsync(args);
+
+				command.Add(encryptCommand);
+			}
+
+			if (args[0] == "decrypt")
+			{
+
+				var decryptCommand = new Command("decrypt")
+				{
+					new Option("-secret", "The secret required to for decryption.") {Argument = new Argument<string>()},
+					new Option("-cipher", "The cipher to decrypt to text.") {Argument = new Argument<string>()}
+				};
+
+				decryptCommand.Handler = CommandHandler.Create<string, string>(Decrypt);
+
+				await decryptCommand.InvokeAsync(args);
 
 
-			encryptCommand.Handler = CommandHandler.Create<string, string>(Encrypt);
-
-			await encryptCommand.InvokeAsync(args);
+				command.Add(decryptCommand);
+			}
 		}
-
 
 		public static void Encrypt(string secret, string text)
 		{
 			var cipher = CipherService.Encrypt(text, secret);
 
 			Console.WriteLine($"The cipher is: {cipher}");
+		}
+
+		public static void Decrypt(string secret, string cipher)
+		{
+			var text = CipherService.Decrypt(cipher, secret);
+
+			Console.WriteLine($"The text is: {text}");
 		}
 	}
 }

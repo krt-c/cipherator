@@ -14,6 +14,12 @@ namespace cif
 		private const int KeySize = 128;
 		private const int DerivationIterations = 1000;
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="plainText"></param>
+		/// <param name="passPhrase"></param>
+		/// <returns></returns>
 		public static string Encrypt(string plainText, string passPhrase)
 		{
 			var saltStringBytes = Generate256BitsOfRandomEntropy();
@@ -41,6 +47,45 @@ namespace cif
 								memoryStream.Close();
 								cryptoStream.Close();
 								return Convert.ToBase64String(cipherTextBytes);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="cipherText"></param>
+		/// <param name="passPhrase"></param>
+		/// <returns></returns>
+		public static string Decrypt(string cipherText, string passPhrase)
+		{
+			var cipherTextBytesWithSaltAndIv = Convert.FromBase64String(cipherText);
+			var saltStringBytes = cipherTextBytesWithSaltAndIv.Take(KeySize / 8).ToArray();
+			var ivStringBytes = cipherTextBytesWithSaltAndIv.Skip(KeySize / 8).Take(KeySize / 8).ToArray();
+			var cipherTextBytes = cipherTextBytesWithSaltAndIv.Skip((KeySize / 8) * 2).Take(cipherTextBytesWithSaltAndIv.Length - ((KeySize / 8) * 2)).ToArray();
+
+			using (var password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations))
+			{
+				var keyBytes = password.GetBytes(KeySize / 8);
+				using (var symmetricKey = new RijndaelManaged())
+				{
+					symmetricKey.BlockSize = 128;
+					symmetricKey.Mode = CipherMode.CBC;
+					symmetricKey.Padding = PaddingMode.PKCS7;
+					using (var decryptor = symmetricKey.CreateDecryptor(keyBytes, ivStringBytes))
+					{
+						using (var memoryStream = new MemoryStream(cipherTextBytes))
+						{
+							using (var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
+							{
+								var plainTextBytes = new byte[cipherTextBytes.Length];
+								var decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
+								memoryStream.Close();
+								cryptoStream.Close();
+								return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
 							}
 						}
 					}

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>cif</name>
+    </assembly>
+    <members>
+        <member name="T:cif.CipherService">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:cif.Program.Main(System.String,System.String[])">
+            <summary>
+            cif is a tool to encrypt or decrypt any text by using a secret key.
+            </summary>
+            <param name="secret">The secret required to encrypt or decrypt.</param>
+            <param name="text">The text to be encrypted. only required when encrypting.</param>
+        </member>
+    </members>
+</doc>

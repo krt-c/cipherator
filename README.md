@@ -1,2 +1,3 @@
-# cipherator
-Secret key encryption decryption. 
+# cif
+
+Secret key encryption decryption.

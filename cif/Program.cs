@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace cif
@@ -15,37 +16,43 @@ namespace cif
 		public static async Task Main(string[] args)
 		{
 			var command = new RootCommand();
-
-			if (args[0] == "encrypt")
+			try
 			{
-				var encryptCommand = new Command("encrypt")
+				if (args[0] == "encrypt")
 				{
-					new Option("-secret", "The secret required to encryption.") {Argument = new Argument<string>()},
-					new Option("-text", "The text to encrypt.") {Argument = new Argument<string>()}
-				};
+					var encryptCommand = new Command("encrypt")
+					{
+						new Option("-secret", "The secret required to encryption.") {Required = true, Argument = new Argument<string>()},
+						new Option("-text", "The text to encrypt.") {Required = true, Argument = new Argument<string>()}
+					};
 
-				encryptCommand.Handler = CommandHandler.Create<string, string>(Encrypt);
+					encryptCommand.Handler = CommandHandler.Create<string, string>(Encrypt);
 
-				await encryptCommand.InvokeAsync(args);
+					await encryptCommand.InvokeAsync(args);
 
-				command.Add(encryptCommand);
+					command.Add(encryptCommand);
+				}
+
+				if (args[0] == "decrypt")
+				{
+
+					var decryptCommand = new Command("decrypt")
+					{
+						new Option("-secret", "The secret required to for decryption."){Required = true, Argument = new Argument<string>()},
+						new Option("-cipher", "The cipher to decrypt to text.") {Required = true, Argument = new Argument<string>()}
+					};
+
+					decryptCommand.Handler = CommandHandler.Create<string, string>(Decrypt);
+
+					await decryptCommand.InvokeAsync(args);
+
+
+					command.Add(decryptCommand);
+				}
 			}
-
-			if (args[0] == "decrypt")
+			catch (NullReferenceException)
 			{
-
-				var decryptCommand = new Command("decrypt")
-				{
-					new Option("-secret", "The secret required to for decryption.") {Argument = new Argument<string>()},
-					new Option("-cipher", "The cipher to decrypt to text.") {Argument = new Argument<string>()}
-				};
-
-				decryptCommand.Handler = CommandHandler.Create<string, string>(Decrypt);
-
-				await decryptCommand.InvokeAsync(args);
-
-
-				command.Add(decryptCommand);
+				Console.WriteLine("Invalid sub command was specified. Specify if you want to encrypt or decrypt.");
 			}
 		}
 
@@ -58,9 +65,16 @@ namespace cif
 
 		public static void Decrypt(string secret, string cipher)
 		{
-			var text = CipherService.Decrypt(cipher, secret);
+			try
+			{
+				var text = CipherService.Decrypt(cipher, secret);
 
-			Console.WriteLine($"The text is: {text}");
+				Console.WriteLine($"The text is: {text}");
+			}
+			catch (CryptographicException)
+			{
+				Console.WriteLine("Something went wrong while decrypting the cipher....");
+			}
 		}
 	}
 }

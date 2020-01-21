@@ -15,4 +15,3 @@ C:\Git\cipherator\cif\obj\Debug\netcoreapp3.0\cif.csproj.CopyComplete
 C:\Git\cipherator\cif\obj\Debug\netcoreapp3.0\cif.dll
 C:\Git\cipherator\cif\obj\Debug\netcoreapp3.0\cif.xml
 C:\Git\cipherator\cif\obj\Debug\netcoreapp3.0\cif.pdb
-C:\Git\cipherator\cif\obj\Debug\netcoreapp3.0\cif.csprojAssemblyReference.cache

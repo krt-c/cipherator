@@ -22,8 +22,8 @@ namespace cif
 				{
 					var encryptCommand = new Command("encrypt")
 					{
-						new Option("-s", "The secret required to encryption.") {Required = true, Argument = new Argument<string>()},
-						new Option("-t", "The text to encrypt.") {Required = true, Argument = new Argument<string>()}
+						new Option("-secret", "The secret required to encryption.") {Required = true, Argument = new Argument<string>()},
+						new Option("-text", "The text to encrypt.") {Required = true, Argument = new Argument<string>()}
 					};
 
 					encryptCommand.Handler = CommandHandler.Create<string, string>(Encrypt);
@@ -38,8 +38,8 @@ namespace cif
 
 					var decryptCommand = new Command("decrypt")
 					{
-						new Option("-s", "The secret required to for decryption."){Required = true, Argument = new Argument<string>()},
-						new Option("-c", "The cipher to decrypt to text.") {Required = true, Argument = new Argument<string>()}
+						new Option("-secret", "The secret required to for decryption."){Required = true, Argument = new Argument<string>()},
+						new Option("-cipher", "The cipher to decrypt to text.") {Required = true, Argument = new Argument<string>()}
 					};
 
 					decryptCommand.Handler = CommandHandler.Create<string, string>(Decrypt);

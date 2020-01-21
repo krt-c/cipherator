@@ -30,6 +30,7 @@ jobs:
       - deploy:
           name: Publish NuGet
           command: |
+            echo $nuget_api_key
             if [ "$CIRCLE_BRANCH" != "master" ]; then
               echo -e "\e[33m Branch does not publish -- exit!"
               exit

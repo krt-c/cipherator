@@ -2,13 +2,13 @@
 Secret key command line encryption decryption nuget tool.
 
 ## Installation
-dotnet tool install -g ktc.cif --version 0.0.5-dev
+dotnet tool install -g ktc.cif --version 0.0.6-dev
 
 ## Update
-dotnet tool update -g ktc.cif --version 0.0.5-dev
+dotnet tool update -g ktc.cif --version 0.0.6-dev
 
 ## Remove
-dotnet tool uninstall -g ktc.cif --version 0.0.5-dev
+dotnet tool uninstall -g ktc.cif --version 0.0.6-dev
 
 ## Commands
 

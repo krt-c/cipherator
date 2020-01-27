@@ -1,18 +1,18 @@
 ﻿using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ktc.cif
 {
-	class Program
+	/// <summary>
+	/// Main program
+	/// </summary>
+	public class Program
 	{
-
-		/// <summary>
-		/// cif is a tool to encrypt or decrypt any text by using a secret key.
-		/// </summary>
-		/// <param name="args"></param>
 		public static async Task Main(string[] args)
 		{
 			var command = new RootCommand();
@@ -48,10 +48,11 @@ namespace ktc.cif
 							var encryptCommand = new Command("encrypt")
 						{
 							new Option("-secret", "The secret required to encryption.") {Argument = new Argument<string>()},
-							new Option("-text", "The text to encrypt.") {Required = true, Argument = new Argument<string>()}
+							new Option("-text", "The text to encrypt.") {Argument = new Argument<string>()},
+							new Option("-file", "The text file path containing a list of strings to encrypt. Each line will be encrypted separately.") {Argument = new Argument<string>()}
 						};
 
-							encryptCommand.Handler = CommandHandler.Create<string, string>(Encrypt);
+							encryptCommand.Handler = CommandHandler.Create<string, string, string>(Encrypt);
 
 							await encryptCommand.InvokeAsync(args);
 
@@ -63,10 +64,11 @@ namespace ktc.cif
 							var decryptCommand = new Command("decrypt")
 						{
 							new Option("-secret", "The secret required to for decryption."){Argument = new Argument<string>()},
-							new Option("-cipher", "The cipher to decrypt to text.") {Required = true, Argument = new Argument<string>()}
+							new Option("-cipher", "The cipher to decrypt to text.") {Argument = new Argument<string>()},
+							new Option("-file", "The text file path containing a list of cipher to decrypt. Each line will be decrypted separately.") {Argument = new Argument<string>()}
 						};
 
-							decryptCommand.Handler = CommandHandler.Create<string, string>(Decrypt);
+							decryptCommand.Handler = CommandHandler.Create<string, string, string>(Decrypt);
 
 							await decryptCommand.InvokeAsync(args);
 
@@ -85,44 +87,67 @@ namespace ktc.cif
 			}
 		}
 
-		public static void Encrypt(string secret, string text)
+		public static void Encrypt(string secret, string text, string file)
 		{
-			if (secret != null)
+			var passPhrase = secret ?? Environment.GetEnvironmentVariable("cif-secret", EnvironmentVariableTarget.User);
+
+			if (passPhrase != null)
 			{
-				var cipher = CipherService.Encrypt(text, secret);
-				Console.WriteLine($"The cipher is: {cipher}");
+				if (text != null)
+				{
+					var cipher = CipherService.Encrypt(text, passPhrase);
+					Console.WriteLine($"The cipher is: {cipher}");
+				}
+				else if (file != null)
+				{
+					Console.WriteLine("The ciphers are:");
+					foreach (var line in File.ReadLines(file, Encoding.UTF8))
+					{
+						var cipher = CipherService.Encrypt(line, passPhrase);
+						Console.WriteLine($"{cipher}");
+					}
+				}
+				else
+				{
+					Console.WriteLine("Text to be encrypted was not provided.");
+				}
 			}
 			else
 			{
-				var s = Environment.GetEnvironmentVariable("cif-secret", EnvironmentVariableTarget.User);
-				if (s == null) Console.WriteLine("Something went wrong while encrypting the text. Secret not provided or configured.....");
-				else
-				{
-					var cipher = CipherService.Encrypt(text, s);
-					Console.WriteLine($"The cipher is: {cipher}");
-				}
+				Console.WriteLine("Something went wrong while encrypting the text. Secret not provided or configured.....");
 			}
 		}
 
-		public static void Decrypt(string secret, string cipher)
+		public static void Decrypt(string secret, string cipher, string file)
 		{
 			try
 			{
-				if (secret != null)
+				var passPhrase = secret ?? Environment.GetEnvironmentVariable("cif-secret", EnvironmentVariableTarget.User);
+
+				if (passPhrase != null)
 				{
-					var text = CipherService.Decrypt(cipher, secret);
-					Console.WriteLine($"The text is: {text}");
+					if (cipher != null)
+					{
+						var text = CipherService.Decrypt(cipher, passPhrase);
+						Console.WriteLine($"The text is: {text}");
+					}
+					else if (file != null)
+					{
+						Console.WriteLine("The ciphers are:");
+						foreach (var line in File.ReadLines(file, Encoding.UTF8))
+						{
+							var text = CipherService.Decrypt(line, passPhrase);
+							Console.WriteLine($"{text}");
+						}
+					}
+					else
+					{
+						Console.WriteLine("Text to be decrypted was not provided.");
+					}
 				}
 				else
 				{
-					var s = Environment.GetEnvironmentVariable("cif-secret", EnvironmentVariableTarget.User);
-					if (s == null)
-						Console.WriteLine("Something went wrong while decrypting the cipher. Secret not provided or configured.....");
-					else
-					{
-						var text = CipherService.Decrypt(cipher, s);
-						Console.WriteLine($"The text is: {text}");
-					}
+					Console.WriteLine("Something went wrong while encrypting the text. Secret not provided or configured.....");
 				}
 			}
 			catch (CryptographicException)

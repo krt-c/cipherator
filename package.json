@@ -1,6 +1,6 @@
 {
   "name": "cipherator",
-  "version": "0.0.4-dev",
+  "version": "0.0.5-dev",
   "description": "Synchronous encryption decryption solution.",
   "solution": "cif.sln"
 }

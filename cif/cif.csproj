@@ -10,6 +10,12 @@
     <RootNamespace>ktc.cif</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="tools\**" />
+    <EmbeddedResource Remove="tools\**" />
+    <None Remove="tools\**" />
+  </ItemGroup>
+
   <!--vendor-->
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />

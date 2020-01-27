@@ -7,7 +7,7 @@ dotnet tool install -g ktc.cif --version 0.0.5-dev
 ## Update
 dotnet tool update -g ktc.cif --version 0.0.5-dev
 
-## Update
+## Remove
 dotnet tool uninstall -g ktc.cif --version 0.0.5-dev
 
 ## Commands
@@ -22,3 +22,10 @@ dotnet tool uninstall -g ktc.cif --version 0.0.5-dev
 * Decrypt a cipher with the provided secret key. ``` cif decrypt -secret passkey -cipher 61jIjXTn1aVVuydV4fgCs/15V6E3c1UeBxgk4b/WHv9zmBqWwof+u/KHPMnHf1VS ```
 * Decrypt a list of ciphers in a text file with the provided secret key.  ```cif decrypt -secret passkey -file  C:\someFile.txt```
 
+### Set Secret Command
+
+* The secret can be set globally so it is not required when encrypting and decrypting. ```cif set -secret tyr-secret```
+
+### Get Secret Command
+
+* Get the secret set globally. ```cif get```

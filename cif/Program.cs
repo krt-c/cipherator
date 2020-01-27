@@ -4,7 +4,7 @@ using System.CommandLine.Invocation;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace cif
+namespace ktc.cif
 {
 	class Program
 	{
@@ -18,63 +18,129 @@ namespace cif
 			var command = new RootCommand();
 			try
 			{
-				if (args[0] == "encrypt")
+				switch (args[0])
 				{
-					var encryptCommand = new Command("encrypt")
-					{
-						new Option("-secret", "The secret required to encryption.") {Required = true, Argument = new Argument<string>()},
-						new Option("-text", "The text to encrypt.") {Required = true, Argument = new Argument<string>()}
-					};
+					case "set":
+						{
+							var setCommand = new Command("set")
+						{
+							new Option("-secret", "The secret required to encryption.") {Required = true, Argument = new Argument<string>()},
+						};
 
-					encryptCommand.Handler = CommandHandler.Create<string, string>(Encrypt);
+							setCommand.Handler = CommandHandler.Create<string>(Set);
 
-					await encryptCommand.InvokeAsync(args);
+							await setCommand.InvokeAsync(args);
 
-					command.Add(encryptCommand);
-				}
+							command.Add(setCommand);
+							break;
+						}
+					case "get":
+						{
+							var getCommand = new Command("get") { Handler = CommandHandler.Create(Get) };
 
-				if (args[0] == "decrypt")
-				{
+							await getCommand.InvokeAsync(args);
 
-					var decryptCommand = new Command("decrypt")
-					{
-						new Option("-secret", "The secret required to for decryption."){Required = true, Argument = new Argument<string>()},
-						new Option("-cipher", "The cipher to decrypt to text.") {Required = true, Argument = new Argument<string>()}
-					};
+							command.Add(getCommand);
+							break;
+						}
+					case "encrypt":
+						{
+							var encryptCommand = new Command("encrypt")
+						{
+							new Option("-secret", "The secret required to encryption.") {Argument = new Argument<string>()},
+							new Option("-text", "The text to encrypt.") {Required = true, Argument = new Argument<string>()}
+						};
 
-					decryptCommand.Handler = CommandHandler.Create<string, string>(Decrypt);
+							encryptCommand.Handler = CommandHandler.Create<string, string>(Encrypt);
 
-					await decryptCommand.InvokeAsync(args);
+							await encryptCommand.InvokeAsync(args);
+
+							command.Add(encryptCommand);
+							break;
+						}
+					case "decrypt":
+						{
+							var decryptCommand = new Command("decrypt")
+						{
+							new Option("-secret", "The secret required to for decryption."){Argument = new Argument<string>()},
+							new Option("-cipher", "The cipher to decrypt to text.") {Required = true, Argument = new Argument<string>()}
+						};
+
+							decryptCommand.Handler = CommandHandler.Create<string, string>(Decrypt);
+
+							await decryptCommand.InvokeAsync(args);
 
 
-					command.Add(decryptCommand);
+							command.Add(decryptCommand);
+							break;
+						}
+					default:
+						Console.WriteLine("Invalid sub command was specified. Specify if you want to encrypt or decrypt text or else set or get secret key.");
+						break;
 				}
 			}
 			catch (NullReferenceException)
 			{
-				Console.WriteLine("Invalid sub command was specified. Specify if you want to encrypt or decrypt.");
+				Console.WriteLine("Invalid sub command was specified. Specify if you want to encrypt or decrypt text or else set or get secret key.");
 			}
 		}
 
 		public static void Encrypt(string secret, string text)
 		{
-			var cipher = CipherService.Encrypt(text, secret);
-
-			Console.WriteLine($"The cipher is: {cipher}");
+			if (secret != null)
+			{
+				var cipher = CipherService.Encrypt(text, secret);
+				Console.WriteLine($"The cipher is: {cipher}");
+			}
+			else
+			{
+				var s = Environment.GetEnvironmentVariable("cif-secret", EnvironmentVariableTarget.User);
+				if (s == null) Console.WriteLine("Something went wrong while encrypting the text. Secret not provided or configured.....");
+				else
+				{
+					var cipher = CipherService.Encrypt(text, s);
+					Console.WriteLine($"The cipher is: {cipher}");
+				}
+			}
 		}
 
 		public static void Decrypt(string secret, string cipher)
 		{
 			try
 			{
-				var text = CipherService.Decrypt(cipher, secret);
-
-				Console.WriteLine($"The text is: {text}");
+				if (secret != null)
+				{
+					var text = CipherService.Decrypt(cipher, secret);
+					Console.WriteLine($"The text is: {text}");
+				}
+				else
+				{
+					var s = Environment.GetEnvironmentVariable("cif-secret", EnvironmentVariableTarget.User);
+					if (s == null)
+						Console.WriteLine("Something went wrong while decrypting the cipher. Secret not provided or configured.....");
+					else
+					{
+						var text = CipherService.Decrypt(cipher, s);
+						Console.WriteLine($"The text is: {text}");
+					}
+				}
 			}
 			catch (CryptographicException)
 			{
 				Console.WriteLine("Something went wrong while decrypting the cipher....");
 			}
+		}
+
+		public static void Set(string secret)
+		{
+			Environment.SetEnvironmentVariable("cif-secret", secret, EnvironmentVariableTarget.User);
+
+			Console.WriteLine($"Secret configured. - Key is  {Environment.GetEnvironmentVariable("cif-secret", EnvironmentVariableTarget.User)}");
+		}
+
+		public static void Get()
+		{
+			Console.WriteLine($"Secret Key is  {Environment.GetEnvironmentVariable("cif-secret", EnvironmentVariableTarget.User)}");
 		}
 	}
 }

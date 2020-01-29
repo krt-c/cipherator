@@ -7,7 +7,7 @@ using System.Text;
 namespace ktc.cif
 {
 	/// <summary>
-	/// 
+	/// Solution taken from:: https://stackoverflow.com/questions/10168240/encrypting-decrypting-a-string-in-c-sharp
 	/// </summary>
 	public static class CipherService
 	{
@@ -15,7 +15,7 @@ namespace ktc.cif
 		private const int DerivationIterations = 1000;
 
 		/// <summary>
-		/// 
+		/// Encrypts the passed plain text.
 		/// </summary>
 		/// <param name="plainText"></param>
 		/// <param name="passPhrase"></param>
@@ -55,7 +55,7 @@ namespace ktc.cif
 		}
 
 		/// <summary>
-		/// 
+		/// Attempts to decrypt the cipher text to plain text with the pass phrase.
 		/// </summary>
 		/// <param name="cipherText"></param>
 		/// <param name="passPhrase"></param>

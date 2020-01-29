@@ -89,9 +89,9 @@ namespace ktc.cif
 			}
 		}
 
-		public static void Encrypt(string secret, string text, string file)
+		private static void Encrypt(string secret, string text, string file)
 		{
-			var passPhrase = secret ?? Environment.GetEnvironmentVariable("cif-secret", EnvironmentVariableTarget.User);
+			var passPhrase = secret ?? Environment.GetEnvironmentVariable(KeyId, EnvironmentVariableTarget.User);
 
 			if (passPhrase != null)
 			{
@@ -120,11 +120,11 @@ namespace ktc.cif
 			}
 		}
 
-		public static void Decrypt(string secret, string cipher, string file)
+		private static void Decrypt(string secret, string cipher, string file)
 		{
 			try
 			{
-				var passPhrase = secret ?? Environment.GetEnvironmentVariable("cif-secret", EnvironmentVariableTarget.User);
+				var passPhrase = secret ?? Environment.GetEnvironmentVariable(KeyId, EnvironmentVariableTarget.User);
 
 				if (passPhrase != null)
 				{
@@ -158,7 +158,7 @@ namespace ktc.cif
 			}
 		}
 
-		public static void Set(string secret)
+		private static void Set(string secret)
 		{
 
 			Environment.SetEnvironmentVariable(KeyId, secret, EnvironmentVariableTarget.User);
@@ -166,7 +166,7 @@ namespace ktc.cif
 			Console.WriteLine($"Secret configured. - Key is  {Environment.GetEnvironmentVariable(KeyId, EnvironmentVariableTarget.User)}");
 		}
 
-		public static void Get()
+		private static void Get()
 		{
 			Console.WriteLine($"Secret Key is  {Environment.GetEnvironmentVariable(KeyId, EnvironmentVariableTarget.User)}");
 		}
